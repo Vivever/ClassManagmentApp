@@ -3,6 +3,7 @@ package com.example.dell.classmanagmentapp;
 import android.app.Dialog;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -18,20 +19,22 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 public class LogInActivity extends AppCompatActivity {
     TextView createAccountTextView;
     EditText logInEmailEditText, logInPasswordEditText, signUpNameEditText, signUpEmailEditText, signUpPhoneEditText, signUpConfirmPasswordEditText,
-             signUpJoinCodeEditText, logInJoinCode, signUpPasswordEditText;
+             signUpPasswordEditText;
     Button signUpButton, logInButton, signupPopupExitButton;
     RadioButton isFacultyRadioButton, isFacultySignUp;
     Dialog signupDialog;
 
     FirebaseDatabase mFirebaseDatabase;  //Create a instance of Firebase database
-    DatabaseReference mDatabaseReference;   // It is used to Refers to a particular part of Database
-    FirebaseAuth mAuth;
+    public static FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,13 +42,10 @@ public class LogInActivity extends AppCompatActivity {
         setContentView(R.layout.activity_log_in);
 
         mFirebaseDatabase = FirebaseDatabase.getInstance();
-        mDatabaseReference = mFirebaseDatabase.getReference("users");
         mAuth = FirebaseAuth.getInstance();
         signupDialog = new Dialog(this);
         logInPasswordEditText = findViewById(R.id.et_password_logInActivity);
         logInEmailEditText = findViewById(R.id.et_email_logInActivity);
-        logInJoinCode = findViewById(R.id.et_joinCode_logInActivity);
-        isFacultyRadioButton = findViewById(R.id.radioButton_isFaculty_loginActivity);
 
         createAccountTextView = findViewById(R.id.tv_createAccount_logInActivity);
         createAccountTextView.setOnClickListener(new View.OnClickListener() {
@@ -61,12 +61,6 @@ public class LogInActivity extends AppCompatActivity {
                 logInFunction();
             }
         });
-        isFacultyRadioButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                logInJoinCode.setVisibility(View.VISIBLE);
-            }
-        });
 
 
     }
@@ -79,18 +73,12 @@ public class LogInActivity extends AppCompatActivity {
         signUpPhoneEditText = signupDialog.findViewById(R.id.et_phone_signUpPopup);
         signUpConfirmPasswordEditText = signupDialog.findViewById(R.id.et_password2_signUpPopup);
         signUpPasswordEditText = signupDialog.findViewById(R.id.et_password_signUpPopup);
-        signUpJoinCodeEditText = signupDialog.findViewById(R.id.et_joinCode_signUpPopup);
         signUpButton = signupDialog.findViewById(R.id.bt_signUp_signUpPopup);
         signupPopupExitButton = signupDialog.findViewById(R.id.bt_exit_signUpPopup);
         isFacultySignUp = signupDialog.findViewById(R.id.radioButton_faculty_signUpPopup);
         signupDialog.show();
 
-        isFacultySignUp.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                signUpJoinCodeEditText.setVisibility(View.VISIBLE);
-            }
-        });
+
 
         signUpButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -104,10 +92,9 @@ public class LogInActivity extends AppCompatActivity {
                                         FirebaseUser user = mAuth.getCurrentUser();
                                         UserObjectClass newUserObj = new UserObjectClass(mAuth.getUid(), signUpNameEditText.getText().toString(),
                                                 signUpEmailEditText.getText().toString(),
-                                                signUpJoinCodeEditText.getText().toString(),
                                                 signUpPhoneEditText.getText().toString(),
                                                 isFacultySignUp.isChecked());
-                                        mDatabaseReference.push().setValue(newUserObj);
+                                        MainActivity.mRefUsers.push().setValue(newUserObj);
                                         signupDialog.dismiss();
                                     } else {
                                         // If sign in fails, display a message to the user.
@@ -140,7 +127,7 @@ public class LogInActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
-                            FirebaseUser user = mAuth.getCurrentUser();
+                            getCurrentUser();
                             Intent intent = new Intent(getApplicationContext(),MainActivity.class);
                             startActivity(intent);
                             finish();
@@ -151,6 +138,40 @@ public class LogInActivity extends AppCompatActivity {
 
                     }
                 });
+    }
+
+    public static void getCurrentUser(){
+        final FirebaseUser user = mAuth.getCurrentUser();
+        MainActivity.mRefUsers.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                UserObjectClass userObject = dataSnapshot.getValue(UserObjectClass.class);
+                if(userObject.getUid().equals(user.getUid())){
+                    MainActivity.FACULTY = userObject.isFaculty();
+                    MainActivity.CURRENT_USER = userObject;
+                }
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
 }

@@ -35,57 +35,31 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/et_email_logInActivity" />
 
-    <RadioButton
-        android:id="@+id/radioButton_isFaculty_loginActivity"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="160dp"
-        android:layout_marginTop="40dp"
-        android:layout_marginEnd="160dp"
-        android:text="Student"
-        android:textAlignment="center"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/et_password_logInActivity" />
-
-    <EditText
-        android:id="@+id/et_joinCode_logInActivity"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="100dp"
-        android:layout_marginTop="46dp"
-        android:layout_marginEnd="98dp"
-        android:ems="10"
-        android:hint="Join Code"
-        android:inputType="number"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/radioButton_isFaculty_loginActivity" />
-
     <Button
         android:id="@+id/bt_logIn_logInActivity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="162dp"
-        android:layout_marginTop="38dp"
+        android:layout_marginTop="48dp"
         android:layout_marginEnd="161dp"
         android:text="Log In"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/et_joinCode_logInActivity" />
+        app:layout_constraintTop_toBottomOf="@+id/et_password_logInActivity" />
 
     <TextView
         android:id="@+id/tv_createAccount_logInActivity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="127dp"
-        android:layout_marginTop="54dp"
+        android:layout_marginTop="28dp"
         android:layout_marginEnd="130dp"
         android:text="Create An Account"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/bt_logIn_logInActivity" />
 

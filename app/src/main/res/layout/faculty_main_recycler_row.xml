@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tv_name_faculty_main_recycler"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Class Name"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/tv_session_faculty_main_recycler"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="19/12/2018 - 04/05/2019"
+        android:textSize="18sp"
+        android:textStyle="italic" />
+
+    <TextView
+        android:id="@+id/tv_student_roll_faculty_main_recycler"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="01 - 48"
+        android:textSize="18sp" />
+</LinearLayout>

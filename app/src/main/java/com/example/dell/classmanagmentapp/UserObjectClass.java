@@ -2,14 +2,13 @@ package com.example.dell.classmanagmentapp;
 
 public class UserObjectClass {
     private String name, email, uid, phone,joinCode;
-    boolean isFaculty;
+    private boolean isFaculty;
 
     public UserObjectClass(){}
 
-    public UserObjectClass(String uid, String name, String email, String joinCode, String phone, boolean isFaculty){
+    public UserObjectClass(String uid, String name, String email, String phone, boolean isFaculty){
         this.email = email;
         this.isFaculty = isFaculty;
-        this.joinCode = joinCode;
         this.name = name;
         this.phone = phone;
         this.uid = uid;
@@ -45,14 +44,6 @@ public class UserObjectClass {
 
     public void setPhone(String phone) {
         this.phone = phone;
-    }
-
-    public String getJoinCode() {
-        return joinCode;
-    }
-
-    public void setJoinCode(String joinCode) {
-        this.joinCode = joinCode;
     }
 
     public boolean isFaculty() {

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_gravity="center_vertical">
+
+    <EditText
+        android:id="@+id/et_name_add_new_class_popup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Class Name"
+        android:inputType="textPersonName" />
+
+    <EditText
+        android:id="@+id/et_code_add_new_class_popup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Class Join Code"
+        android:inputType="number" />
+
+    <EditText
+        android:id="@+id/et_session_start_add_new_class_popup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Session Start Date"
+        android:inputType="textPersonName"
+        android:focusable="false"/>
+
+    <EditText
+        android:id="@+id/et_session_end_add_new_class_popup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Session End Date"
+        android:inputType="textPersonName"
+        android:focusable="false"/>
+
+    <EditText
+        android:id="@+id/et_roll_start_add_new_class_popup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Start Roll"
+        android:inputType="number" />
+
+    <EditText
+        android:id="@+id/et_roll_end_add_new_class_popup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="End Roll"
+        android:inputType="number" />
+
+    <Button
+        android:id="@+id/bt_add_new_class_popup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Add" />
+
+</LinearLayout>
