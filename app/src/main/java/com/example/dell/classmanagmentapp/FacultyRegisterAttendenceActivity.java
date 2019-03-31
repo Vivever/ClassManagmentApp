@@ -64,8 +64,11 @@ public class FacultyRegisterAttendenceActivity extends AppCompatActivity impleme
         done.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Date todayDate = Calendar.getInstance().getTime();
+                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+                String todayString = formatter.format(todayDate);
                 for(j = startRoll-1; j<endRoll; j++){
-                    finalAttendanceList.add(new AttendanceObjectClass(j+1,presentStudentRollList.get(j-(startRoll-1))));
+                    finalAttendanceList.add(new AttendanceObjectClass(j+1,presentStudentRollList.get(j-(startRoll-1)),todayString));
                 }
                 new AlertDialog.Builder(FacultyRegisterAttendenceActivity.this)
                         .setIcon(android.R.drawable.ic_dialog_alert)
@@ -94,13 +97,10 @@ public class FacultyRegisterAttendenceActivity extends AppCompatActivity impleme
         adapter.notifyDataSetChanged();
     }
     public void uploadAttendanceData(){
-        Date todayDate = Calendar.getInstance().getTime();
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-        String todayString = formatter.format(todayDate);
         DatabaseReference attendanceRef = MainActivity.mRefClass.child(MainActivity.selectedClassIdList.get(FacultyMainRecyclerAdapter.FACULTY_LIST_INDEX))
-                .child("attendance_" + todayString);
+                .child("attendance");
         for(AttendanceObjectClass obj : finalAttendanceList) {
-            attendanceRef.child(Integer.toString(obj.roll)).setValue(obj.status);
+            attendanceRef.push().setValue(obj);
         }
     }
 }

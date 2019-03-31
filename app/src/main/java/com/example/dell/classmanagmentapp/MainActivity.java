@@ -147,8 +147,6 @@ public class MainActivity extends AppCompatActivity
             adapter = new FacultyMainRecyclerAdapter(classList);
             loadFacultyMainRecycler();
         }
-
-
     }
 
     @Override
@@ -245,6 +243,8 @@ public class MainActivity extends AppCompatActivity
                     addClassPopup.dismiss();
                     recyclerView.setAdapter(adapter);
                     adapter.notifyDataSetChanged();
+                    finish();
+                    startActivity(getIntent());
                 }
             });
         }

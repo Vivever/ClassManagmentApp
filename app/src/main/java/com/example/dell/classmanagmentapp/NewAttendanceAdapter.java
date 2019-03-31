@@ -31,18 +31,6 @@ public class NewAttendanceAdapter extends RecyclerView.Adapter<NewAttendanceAdap
     @Override
     public void onBindViewHolder(@NonNull final MyViewHolder myViewHolder, final int i){
         myViewHolder.textView.setText(rollList.get(i));
-        /*myViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(FacultyRegisterAttendenceActivity.presentStudentRollList.get(i).equals("ABSENT")){
-                    FacultyRegisterAttendenceActivity.presentStudentRollList.set(i,"PRESENT");
-                    myViewHolder.textView.setBackgroundColor(Color.parseColor("#f48f42"));
-                }else {
-                    FacultyRegisterAttendenceActivity.presentStudentRollList.set(i,"ABSENT");
-                    myViewHolder.textView.setBackgroundColor(Color.parseColor("#80000000"));
-                }
-            }
-        });*/
         if(FacultyRegisterAttendenceActivity.presentStudentRollList.get(i).equals("PRESENT")){
             myViewHolder.textView.setBackgroundColor(Color.parseColor("#f48f42"));
         }else {
