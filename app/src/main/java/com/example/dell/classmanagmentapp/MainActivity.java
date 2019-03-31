@@ -51,9 +51,10 @@ public class MainActivity extends AppCompatActivity
     public static FirebaseDatabase mFirebaseDatabase;  //Create a instance of Firebase database
     public static DatabaseReference mRefClass;   // It is used to Refers to a particular part of Database
     public static DatabaseReference mRefUsers;   // It is used to Refers to a particular part of Database
+    public static DatabaseReference mRefOldRecord;
 
     public FirebaseUser currentUser;
-    public ArrayList<ClassMasterClass> classList;
+    public static ArrayList<ClassMasterClass> classList;
     public static ArrayList<String> selectedClassIdList;
     public RecyclerView recyclerView;
     FacultyMainRecyclerAdapter adapter;
@@ -70,10 +71,12 @@ public class MainActivity extends AppCompatActivity
 
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mRefClass = mFirebaseDatabase.getReference("classes");
-        MainActivity.mRefUsers = mFirebaseDatabase.getReference("users");
+        mRefUsers = mFirebaseDatabase.getReference("users");
+        mRefOldRecord = mFirebaseDatabase.getReference("old_class_records");
         LogInActivity.mAuth = FirebaseAuth.getInstance();
         currentUser = LogInActivity.mAuth.getCurrentUser();
         classList = new ArrayList<>();
+        classList.clear();
         recyclerView = findViewById(R.id.recycler_view_faculty_classes);
         selectedClassIdList = new ArrayList<>();
 
@@ -129,7 +132,8 @@ public class MainActivity extends AppCompatActivity
                 }
                 @Override
                 public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-
+                    finish();
+                    startActivity(getIntent());
                 }
                 @Override
                 public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
@@ -192,14 +196,12 @@ public class MainActivity extends AppCompatActivity
 
         if(id==R.id.nav_profile){
             startActivity(new Intent(this,UserProfile.class));
-        }else if (id == R.id.nav_register) {
-
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
+        }
+        else if (id == R.id.nav_gallery) {
+        }
+        else if (id == R.id.nav_slideshow) {
         }
         else if (id == R.id.nav_share) {
-
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -284,6 +286,7 @@ public class MainActivity extends AppCompatActivity
         });
 
     }
+
     private void loadFacultyMainRecycler(){
 
         LinearLayoutManager llm = new LinearLayoutManager(this);
