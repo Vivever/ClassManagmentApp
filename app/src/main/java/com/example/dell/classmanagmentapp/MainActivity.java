@@ -1,16 +1,15 @@
 package com.example.dell.classmanagmentapp;
 
-import android.app.Application;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -23,9 +22,8 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.Toast;
+import android.widget.TextView;
 
-import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -33,9 +31,9 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.TestOnly;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -52,12 +50,21 @@ public class MainActivity extends AppCompatActivity
     public static DatabaseReference mRefClass;   // It is used to Refers to a particular part of Database
     public static DatabaseReference mRefUsers;   // It is used to Refers to a particular part of Database
     public static DatabaseReference mRefOldRecord;
+    public static DatabaseReference mRefStudentClass;
+
+    public static int STUDENT_ROLL;
+
+    public static TextView navUsername;
 
     public FirebaseUser currentUser;
     public static ArrayList<ClassMasterClass> classList;
     public static ArrayList<String> selectedClassIdList;
+    public static ArrayList<String> studentClassKeyList;
+    public static ArrayList<String> studentAttendancePercentList;
+
     public RecyclerView recyclerView;
     FacultyMainRecyclerAdapter adapter;
+    StudentMainRecyclerAdapter studentAdapter;
 
     private FirebaseAuth.AuthStateListener authStateListener; // It is used to listen to authentication state change i.e sign in or sign out
 
@@ -73,13 +80,20 @@ public class MainActivity extends AppCompatActivity
         mRefClass = mFirebaseDatabase.getReference("classes");
         mRefUsers = mFirebaseDatabase.getReference("users");
         mRefOldRecord = mFirebaseDatabase.getReference("old_class_records");
+        mRefStudentClass = mFirebaseDatabase.getReference("studentClass");
         LogInActivity.mAuth = FirebaseAuth.getInstance();
         currentUser = LogInActivity.mAuth.getCurrentUser();
         classList = new ArrayList<>();
+        studentClassKeyList = new ArrayList<>();
+        studentAttendancePercentList = new ArrayList<>();
+        studentAttendancePercentList.clear();
+        studentClassKeyList.clear();
         classList.clear();
-        recyclerView = findViewById(R.id.recycler_view_faculty_classes);
+        recyclerView = findViewById(R.id.recycler_view_main);
         selectedClassIdList = new ArrayList<>();
-
+        LinearLayoutManager llm = new LinearLayoutManager(this);
+        llm.setOrientation(LinearLayoutManager.VERTICAL);
+        recyclerView.setLayoutManager(llm);
         //<editor-fold desc=" DEFAULT RUN CODE ">
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -89,6 +103,9 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        View headerView = navigationView.getHeaderView(0);
+        navUsername = (TextView) headerView.findViewById(R.id.tv_nav_header_title);
 
         if(currentUser == null){
             Intent loginIntent = new Intent(getApplicationContext(),LogInActivity.class);
@@ -146,6 +163,50 @@ public class MainActivity extends AppCompatActivity
             });
             adapter = new FacultyMainRecyclerAdapter(classList);
             loadFacultyMainRecycler();
+        }
+        if(!FACULTY && LOGGED_IN){
+            mRefStudentClass.addChildEventListener(new ChildEventListener() {
+                @Override
+                public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                    ClassStudentClass studentClass = dataSnapshot.getValue(ClassStudentClass.class);
+                    if(studentClass.studentUID.equals(CURRENT_USER.getUid())){
+                        studentClassKeyList.add(studentClass.classKey);
+                        STUDENT_ROLL = Integer.parseInt(studentClass.roll);
+                        selectedClassIdList.add(dataSnapshot.getKey());
+                    }
+                }
+
+                @Override
+                public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+                }
+
+                @Override
+                public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+                }
+
+                @Override
+                public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+            mRefStudentClass.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    downloadAttendanceClassData();
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
         }
     }
 
@@ -237,7 +298,7 @@ public class MainActivity extends AppCompatActivity
             addClass.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    ClassMasterClass classMasterObject = new ClassMasterClass(LogInActivity.mAuth.getUid(), className.getText().toString(),joinCode.getText().toString(),
+                    ClassMasterClass classMasterObject = new ClassMasterClass(CURRENT_USER.getName(),CURRENT_USER.getEmail(),LogInActivity.mAuth.getUid(), className.getText().toString(),joinCode.getText().toString(),
                             sessionStart.getText().toString(), sessionEnd.getText().toString(), startRoll.getText().toString(), endRoll.getText().toString());
                     mRefClass.push().setValue(classMasterObject);
                     addClassPopup.dismiss();
@@ -249,7 +310,54 @@ public class MainActivity extends AppCompatActivity
             });
         }
         else{
-            //Student add here
+            final Dialog addClassPopup = new Dialog(this);
+            addClassPopup.setContentView(R.layout.student_addclass_popup);
+            Button addClass = addClassPopup.findViewById(R.id.bt_add_new_class_student_popup);
+            final EditText facultyEmail, joinCode, roll;
+            facultyEmail = addClassPopup.findViewById(R.id.et_facultyemail_add_new_class_student_popup);
+            joinCode = addClassPopup.findViewById(R.id.et_code_add_new_class_student_popup);
+            roll = addClassPopup.findViewById(R.id.et_roll_add_new_class_student_popup);
+            addClassPopup.show();
+            addClass.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    mRefClass.addChildEventListener(new ChildEventListener() {
+                        @Override
+                        public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                            ClassMasterClass classObj = dataSnapshot.getValue(ClassMasterClass.class);
+                            if(classObj.facultyEmail.equals(facultyEmail.getText().toString()) && classObj.joinCode.equals(joinCode.getText().toString())){
+                                studentClassAdd(roll.getText().toString(),facultyEmail.getText().toString(),
+                                        joinCode.getText().toString(),CURRENT_USER.getUid(),dataSnapshot.getKey());
+                            }
+                        }
+
+                        @Override
+                        public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+                        }
+
+                        @Override
+                        public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+                        }
+
+                        @Override
+                        public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+                    addClassPopup.dismiss();
+                    finish();
+                    startActivity(getIntent());
+                }
+            });
+
+
         }
     }
 
@@ -293,6 +401,74 @@ public class MainActivity extends AppCompatActivity
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(llm);
         recyclerView.setAdapter(adapter);
+    }
+
+    private void studentClassAdd(String roll, String facultyEmail, String joinCode, String studentUID, String classKey){
+        ClassStudentClass studentClass = new ClassStudentClass(roll,facultyEmail,joinCode,studentUID,classKey);
+        mRefStudentClass.push().setValue(studentClass);
+    }
+
+    private void downloadAttendanceClassData(){
+
+        classList.clear();
+        studentAttendancePercentList.clear();
+        for (int i = 0 ; i < studentClassKeyList.size(); i++) {
+            Log.i("LOGNEW", studentClassKeyList.get(i) + "   " + STUDENT_ROLL);
+        }
+        mRefClass.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (int i = 0; i<studentClassKeyList.size();i++){
+                    Double value;
+                    value = dataSnapshot.child(studentClassKeyList.get(i)).child("attendance_detailed_percentage")
+                            .child(Integer.toString(STUDENT_ROLL)).getValue(Double.class);
+                    try {
+                        studentAttendancePercentList.add(value.toString());
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }
+                downloadStudentClassList();
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    public void downloadStudentClassList(){
+        mRefClass.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (int i = 0; i <studentClassKeyList.size(); i++){
+                    classList.add(dataSnapshot.child(studentClassKeyList.get(i)).getValue(ClassMasterClass.class));
+                }
+                for (int i = 0; i <studentClassKeyList.size(); i++){
+                    Log.i("LOGNEW", "Classlist  "+classList.get(i).className);
+                }
+                updateStudentMainRecycler();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+
+    public void updateStudentMainRecycler(){
+        Log.i("LOGNEW", "updaterecycler()");
+        try {
+            studentAdapter = new StudentMainRecyclerAdapter(studentAttendancePercentList, classList);
+            recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
+            recyclerView.setAdapter(studentAdapter);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
 }

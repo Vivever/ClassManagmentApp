@@ -78,7 +78,7 @@ public class FacultyRegisterAttendenceActivity extends AppCompatActivity impleme
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 uploadAttendanceData();
-                                Intent intent = new Intent(getApplicationContext(),MainActivity.class);
+                                Intent intent = new Intent(getApplicationContext(),FacultyAttendenceCheckActivity.class);
                                 startActivity(intent);
                                 finish();
                             }

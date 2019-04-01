@@ -25,6 +25,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import static com.example.dell.classmanagmentapp.MainActivity.CURRENT_USER;
+
 public class LogInActivity extends AppCompatActivity {
     TextView createAccountTextView;
     EditText logInEmailEditText, logInPasswordEditText, signUpNameEditText, signUpEmailEditText, signUpPhoneEditText, signUpConfirmPasswordEditText,
@@ -149,6 +151,7 @@ public class LogInActivity extends AppCompatActivity {
                 if(userObject.getUid().equals(user.getUid())){
                     MainActivity.FACULTY = userObject.isFaculty();
                     MainActivity.CURRENT_USER = userObject;
+                    MainActivity.navUsername.setText(MainActivity.CURRENT_USER.getName());
                 }
             }
 
