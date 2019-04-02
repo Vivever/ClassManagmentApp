@@ -144,9 +144,11 @@ public class LogInActivity extends AppCompatActivity {
 
     public static void getCurrentUser(){
         final FirebaseUser user = mAuth.getCurrentUser();
+        
         MainActivity.mRefUsers.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+//                MainActivity mainActivity =new MainActivity();
                 UserObjectClass userObject = dataSnapshot.getValue(UserObjectClass.class);
                 if(userObject.getUid().equals(user.getUid())){
                     MainActivity.FACULTY = userObject.isFaculty();
